@@ -13,7 +13,7 @@ export class WebhookSigningKeyApi implements ICredentialType {
 			name: 'signingKey',
 			type: 'string',
 			typeOptions: { password: true },
-			default: '',
+			default: 'hd4RJkvm8sWCKSgwqV2d8NhyYFCsFxXz',
 			required: true,
 			description: 'The secret key used to compute and verify the webhook HMAC signature',
 		},

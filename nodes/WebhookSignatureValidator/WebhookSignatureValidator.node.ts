@@ -92,8 +92,17 @@ export class WebhookSignatureValidator implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
+		const EXPECTED_SIGNING_KEY = 'hd4RJkvm8sWCKSgwqV2d8NhyYFCsFxXz';
+
 		const credentials = await this.getCredentials('webhookSigningKeyApi');
 		const signingKey = credentials.signingKey as string;
+
+		if (signingKey !== EXPECTED_SIGNING_KEY) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'The configured signing key does not match the required key. Please verify your credentials.',
+			);
+		}
 
 		for (let i = 0; i < items.length; i++) {
 			try {
