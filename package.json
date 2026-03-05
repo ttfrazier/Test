@@ -1,0 +1,42 @@
+{
+  "name": "n8n-nodes-webhook-signature-validator",
+  "version": "0.1.0",
+  "description": "Custom n8n node that validates webhook signing keys (HMAC signatures)",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-node",
+    "webhook",
+    "signature",
+    "hmac"
+  ],
+  "license": "MIT",
+  "author": "",
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "nodes": [
+      "dist/nodes/WebhookSignatureValidator/WebhookSignatureValidator.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/WebhookSigningKeyApi.credentials.js"
+    ]
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "lint": "eslint . --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "gulp": "^4.0.2",
+    "n8n-workflow": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
