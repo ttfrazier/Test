@@ -7,604 +7,195 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
+    .jira-widget {
+      --widget-border-radius: 8px;
+      --widget-border-color: #dfe1e6;
+      --widget-header-bg: #fff;
+      --widget-header-color: #172b4d;
+      --widget-accent: #0052cc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #f4f5f7;
-      color: #172b4d;
-      min-height: 100vh;
-    }
-
-    /* ── Login Screen ── */
-    .login-overlay {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-    .login-overlay.hidden { display: none; }
-
-    .login-card {
+      border: 1px solid var(--widget-border-color);
+      border-radius: var(--widget-border-radius);
+      overflow: hidden;
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-      padding: 40px;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    .login-card__logo {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-size: 20px;
-      font-weight: 700;
-      color: #0052cc;
-    }
-
-    .login-card__subtitle {
-      color: #6b778c;
-      font-size: 13px;
-      margin-bottom: 28px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #6b778c;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-group input {
+      flex-direction: column;
       width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #dfe1e6;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: border-color 0.15s;
-      outline: none;
+      max-width: 1200px;
+      height: 700px;
     }
 
-    .form-group input:focus {
-      border-color: #0052cc;
-    }
-
-    .form-group small {
-      display: block;
-      margin-top: 4px;
-      font-size: 11px;
-      color: #97a0af;
-    }
-
-    .form-group small a {
-      color: #0052cc;
-    }
-
-    .login-btn {
-      width: 100%;
-      padding: 12px;
-      background: #0052cc;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-top: 8px;
-    }
-
-    .login-btn:hover { background: #0747a6; }
-    .login-btn:disabled { background: #97a0af; cursor: not-allowed; }
-
-    .login-error {
-      background: #ffebe6;
-      color: #bf2600;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .login-error.show { display: block; }
-
-    /* ── Dashboard ── */
-    .dashboard { display: none; }
-    .dashboard.visible { display: block; }
-
-    .dashboard__header {
-      background: #fff;
-      border-bottom: 1px solid #dfe1e6;
-      padding: 14px 24px;
+    .jira-widget__header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      padding: 10px 16px;
+      background: var(--widget-header-bg);
+      border-bottom: 1px solid var(--widget-border-color);
+      flex-shrink: 0;
     }
 
-    .dashboard__title {
+    .jira-widget__title {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 700;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--widget-header-color);
     }
 
-    .dashboard__actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .jira-widget__logo {
+      width: 20px;
+      height: 20px;
     }
 
-    .dashboard__status {
+    .jira-widget__actions {
       display: flex;
+      gap: 8px;
+    }
+
+    .jira-widget__btn {
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      padding: 4px 10px;
       font-size: 12px;
-      color: #6b778c;
-    }
-
-    .dashboard__dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #36b37e;
-    }
-
-    .btn {
-      padding: 6px 14px;
-      font-size: 13px;
       font-weight: 500;
-      border-radius: 4px;
-      border: 1px solid #dfe1e6;
-      background: #f4f5f7;
       color: #42526e;
+      background: #f4f5f7;
+      border: 1px solid var(--widget-border-color);
+      border-radius: 4px;
       cursor: pointer;
+      text-decoration: none;
       transition: background 0.15s;
     }
 
-    .btn:hover { background: #ebecf0; }
-
-    .btn--danger {
-      color: #bf2600;
+    .jira-widget__btn:hover {
+      background: #ebecf0;
     }
 
-    .dashboard__body {
-      padding: 24px;
-    }
-
-    /* ── Project Selector ── */
-    .project-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .project-bar select {
-      padding: 8px 12px;
-      border: 2px solid #dfe1e6;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
-      min-width: 240px;
-    }
-
-    .project-bar select:focus { border-color: #0052cc; }
-
-    .stats-bar {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .stat-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 16px 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      min-width: 140px;
-    }
-
-    .stat-card__value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #0052cc;
-    }
-
-    .stat-card__label {
-      font-size: 12px;
-      color: #6b778c;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-
-    /* ── Ideas Table ── */
-    .ideas-table-wrap {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      overflow: hidden;
-    }
-
-    .ideas-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .ideas-table th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #6b778c;
-      background: #fafbfc;
-      border-bottom: 2px solid #dfe1e6;
-    }
-
-    .ideas-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f1f3;
-      vertical-align: top;
-    }
-
-    .ideas-table tr:last-child td { border-bottom: none; }
-
-    .ideas-table tr:hover td {
+    .jira-widget__frame-container {
+      flex: 1;
+      position: relative;
       background: #f4f5f7;
     }
 
-    .idea-key {
-      font-family: SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
-      color: #0052cc;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .idea-summary {
-      font-weight: 500;
-    }
-
-    .idea-summary a {
-      color: #172b4d;
-      text-decoration: none;
-    }
-    .idea-summary a:hover { text-decoration: underline; }
-
-    .status-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .priority-icon {
-      font-size: 16px;
-    }
-
-    /* ── Loading / Empty ── */
-    .loading-bar {
+    .jira-widget__loader {
+      position: absolute;
+      inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px;
-      color: #6b778c;
+      flex-direction: column;
       gap: 12px;
+      color: #6b778c;
+      font-size: 13px;
+      z-index: 1;
+      transition: opacity 0.3s;
     }
 
-    .spinner {
-      width: 22px;
-      height: 22px;
+    .jira-widget__loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .jira-widget__spinner {
+      width: 28px;
+      height: 28px;
       border: 3px solid #dfe1e6;
-      border-top-color: #0052cc;
+      border-top-color: var(--widget-accent);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
-    .empty-state {
-      text-align: center;
-      padding: 48px;
+    .jira-widget__iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .jira-widget__status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
       color: #6b778c;
     }
 
-    .auto-refresh-note {
-      font-size: 11px;
-      color: #97a0af;
-      text-align: center;
-      margin-top: 16px;
+    .jira-widget__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #36b37e;
     }
   </style>
 </head>
-<body>
+<body style="padding: 24px; background: #f9fafb;">
 
-  <!-- Login Screen -->
-  <div class="login-overlay" id="loginOverlay">
-    <div class="login-card">
-      <div class="login-card__logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M11.53 2c0 5.24 4.24 9.47 9.47 9.47v1.06c-5.23 0-9.47 4.24-9.47 9.47h-1.06c0-5.23-4.24-9.47-9.47-9.47v-1.06c5.23 0 9.47-4.24 9.47-9.47h1.06z" fill="#0052CC"/>
-        </svg>
-        Jira Discovery Widget
-      </div>
-      <p class="login-card__subtitle">
-        Connect to your Atlassian account to view your Product Discovery board live.
-      </p>
-
-      <div class="login-error" id="loginError"></div>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="siteInput">Atlassian Site</label>
-          <input type="text" id="siteInput" value="equityprime.atlassian.net" placeholder="yoursite.atlassian.net" required>
-        </div>
-        <div class="form-group">
-          <label for="emailInput">Email</label>
-          <input type="email" id="emailInput" placeholder="you@company.com" required>
-        </div>
-        <div class="form-group">
-          <label for="tokenInput">API Token</label>
-          <input type="password" id="tokenInput" placeholder="Your Atlassian API token" required>
-          <small><a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener">Create an API token here</a></small>
-        </div>
-        <button type="submit" class="login-btn" id="loginBtn">Connect</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Dashboard -->
-  <div class="dashboard" id="dashboard">
-    <div class="dashboard__header">
-      <div class="dashboard__title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+  <div class="jira-widget" id="jiraWidget">
+    <div class="jira-widget__header">
+      <div class="jira-widget__title">
+        <svg class="jira-widget__logo" viewBox="0 0 24 24" fill="none">
           <path d="M11.53 2c0 5.24 4.24 9.47 9.47 9.47v1.06c-5.23 0-9.47 4.24-9.47 9.47h-1.06c0-5.23-4.24-9.47-9.47-9.47v-1.06c5.23 0 9.47-4.24 9.47-9.47h1.06z" fill="#0052CC"/>
         </svg>
         Jira Product Discovery
       </div>
-      <div class="dashboard__actions">
-        <span class="dashboard__status">
-          <span class="dashboard__dot"></span>
+
+      <div class="jira-widget__actions">
+        <span class="jira-widget__status">
+          <span class="jira-widget__dot"></span>
           Live
         </span>
-        <button class="btn" onclick="loadIdeas()">&#x21bb; Refresh</button>
-        <a class="btn" id="openLink" href="#" target="_blank" rel="noopener">&#x2197; Open in Jira</a>
-        <button class="btn btn--danger" onclick="logout()">Logout</button>
+        <button class="jira-widget__btn" onclick="refreshWidget()" title="Refresh">
+          &#x21bb; Refresh
+        </button>
+        <a class="jira-widget__btn"
+           href="https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1"
+           target="_blank" rel="noopener noreferrer" title="Open in new tab">
+          &#x2197; Open
+        </a>
       </div>
     </div>
 
-    <div class="dashboard__body">
-      <div class="project-bar">
-        <label style="font-weight:600;font-size:14px;">Project:</label>
-        <select id="projectSelect" onchange="loadIdeas()">
-          <option value="">Loading projects…</option>
-        </select>
+    <div class="jira-widget__frame-container">
+      <div class="jira-widget__loader" id="loader">
+        <div class="jira-widget__spinner"></div>
+        Loading Jira Discovery Board&hellip;
       </div>
-
-      <div class="stats-bar" id="statsBar"></div>
-
-      <div class="ideas-table-wrap">
-        <div id="ideasContainer">
-          <div class="loading-bar"><div class="spinner"></div> Loading ideas…</div>
-        </div>
-      </div>
-
-      <p class="auto-refresh-note">Auto-refreshes every 2 minutes</p>
+      <iframe
+        id="jiraFrame"
+        class="jira-widget__iframe"
+        src="https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1"
+        loading="lazy"
+        allow="clipboard-read; clipboard-write"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
     </div>
   </div>
 
   <script>
-    let auth = null;
-    let refreshTimer = null;
+    const JIRA_URL = 'https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1';
+    const iframe = document.getElementById('jiraFrame');
+    const loader = document.getElementById('loader');
 
-    // ── API Helper ──
-    async function jiraGet(apiPath) {
-      const resp = await fetch('/api/jira?path=' + encodeURIComponent(apiPath), {
-        headers: {
-          'Authorization': 'Basic ' + btoa(auth.email + ':' + auth.token),
-          'X-Atlassian-Site': auth.site,
-        },
-      });
-      if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(`HTTP ${resp.status}: ${text}`);
-      }
-      return resp.json();
-    }
-
-    // ── Login ──
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('loginBtn');
-      const errEl = document.getElementById('loginError');
-      errEl.classList.remove('show');
-      btn.disabled = true;
-      btn.textContent = 'Connecting…';
-
-      auth = {
-        site: document.getElementById('siteInput').value.trim(),
-        email: document.getElementById('emailInput').value.trim(),
-        token: document.getElementById('tokenInput').value.trim(),
-      };
-
-      try {
-        await loadProjects();
-        document.getElementById('loginOverlay').classList.add('hidden');
-        document.getElementById('dashboard').classList.add('visible');
-        document.getElementById('openLink').href =
-          'https://' + auth.site + '/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1';
-        await loadIdeas();
-        refreshTimer = setInterval(loadIdeas, 2 * 60 * 1000);
-      } catch (err) {
-        errEl.textContent = 'Connection failed: ' + err.message;
-        errEl.classList.add('show');
-        auth = null;
-      }
-
-      btn.disabled = false;
-      btn.textContent = 'Connect';
+    iframe.addEventListener('load', () => {
+      loader.classList.add('hidden');
     });
 
-    function logout() {
-      auth = null;
-      clearInterval(refreshTimer);
-      document.getElementById('loginOverlay').classList.remove('hidden');
-      document.getElementById('dashboard').classList.remove('visible');
+    function refreshWidget() {
+      loader.classList.remove('hidden');
+      iframe.src = JIRA_URL + '?t=' + Date.now();
     }
 
-    // ── Load Projects ──
-    async function loadProjects() {
-      const data = await jiraGet('/rest/api/3/project/search?typeKey=product_discovery&maxResults=50');
-      const select = document.getElementById('projectSelect');
-      select.innerHTML = '';
-
-      const projects = data.values || [];
-      if (projects.length === 0) {
-        // Fallback: load all projects
-        const allData = await jiraGet('/rest/api/3/project/search?maxResults=50');
-        (allData.values || []).forEach((p) => {
-          const opt = document.createElement('option');
-          opt.value = p.key;
-          opt.textContent = p.name + ' (' + p.key + ')';
-          select.appendChild(opt);
-        });
-      } else {
-        projects.forEach((p) => {
-          const opt = document.createElement('option');
-          opt.value = p.key;
-          opt.textContent = p.name + ' (' + p.key + ')';
-          select.appendChild(opt);
-        });
-      }
-    }
-
-    // ── Load Ideas ──
-    async function loadIdeas() {
-      const container = document.getElementById('ideasContainer');
-      const statsBar = document.getElementById('statsBar');
-      const projectKey = document.getElementById('projectSelect').value;
-
-      if (!projectKey) return;
-
-      container.innerHTML = '<div class="loading-bar"><div class="spinner"></div> Loading ideas…</div>';
-
-      try {
-        const jql = encodeURIComponent(`project = "${projectKey}" ORDER BY created DESC`);
-        const data = await jiraGet(
-          `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,priority,issuetype,assignee,created,updated`
-        );
-
-        const issues = data.issues || [];
-
-        // Stats
-        const statusCounts = {};
-        issues.forEach((i) => {
-          const name = i.fields.status?.name || 'Unknown';
-          statusCounts[name] = (statusCounts[name] || 0) + 1;
-        });
-
-        statsBar.innerHTML = `
-          <div class="stat-card">
-            <div class="stat-card__value">${issues.length}</div>
-            <div class="stat-card__label">Total Ideas</div>
-          </div>
-          ${Object.entries(statusCounts).map(([status, count]) => `
-            <div class="stat-card">
-              <div class="stat-card__value">${count}</div>
-              <div class="stat-card__label">${escapeHtml(status)}</div>
-            </div>
-          `).join('')}
-        `;
-
-        if (issues.length === 0) {
-          container.innerHTML = '<div class="empty-state">No ideas found in this project.</div>';
-          return;
-        }
-
-        const rows = issues.map((issue) => {
-          const f = issue.fields;
-          const statusColor = getStatusColor(f.status?.statusCategory?.colorName);
-          const jiraUrl = `https://${auth.site}/browse/${issue.key}`;
-          const assignee = f.assignee
-            ? escapeHtml(f.assignee.displayName)
-            : '<span style="color:#97a0af">Unassigned</span>';
-          const created = new Date(f.created).toLocaleDateString();
-
-          return `
-            <tr>
-              <td><span class="idea-key">${escapeHtml(issue.key)}</span></td>
-              <td class="idea-summary">
-                <a href="${jiraUrl}" target="_blank" rel="noopener">${escapeHtml(f.summary)}</a>
-              </td>
-              <td>
-                <span class="status-badge" style="background:${statusColor.bg};color:${statusColor.text}">
-                  ${escapeHtml(f.status?.name || 'Unknown')}
-                </span>
-              </td>
-              <td>${assignee}</td>
-              <td style="white-space:nowrap;color:#6b778c;font-size:12px">${created}</td>
-            </tr>
-          `;
-        }).join('');
-
-        container.innerHTML = `
-          <table class="ideas-table">
-            <thead>
-              <tr>
-                <th>Key</th>
-                <th>Summary</th>
-                <th>Status</th>
-                <th>Assignee</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        `;
-      } catch (err) {
-        container.innerHTML = `<div class="empty-state" style="color:#bf2600">
-          Error loading ideas: ${escapeHtml(err.message)}
-        </div>`;
-      }
-    }
-
-    // ── Helpers ──
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function getStatusColor(colorName) {
-      const colors = {
-        'blue-gray': { bg: '#dfe1e6', text: '#42526e' },
-        'yellow':    { bg: '#fff0b3', text: '#172b4d' },
-        'green':     { bg: '#e3fcef', text: '#006644' },
-        'blue':      { bg: '#deebff', text: '#0747a6' },
-        'red':       { bg: '#ffebe6', text: '#bf2600' },
-      };
-      return colors[colorName] || colors['blue-gray'];
-    }
+    // Auto-refresh every 5 minutes to keep it live
+    setInterval(refreshWidget, 5 * 60 * 1000);
   </script>
 
 </body>
