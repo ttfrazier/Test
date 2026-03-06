@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jira Discovery Board Widget</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .jira-widget {
+      --widget-border-radius: 8px;
+      --widget-border-color: #dfe1e6;
+      --widget-header-bg: #fff;
+      --widget-header-color: #172b4d;
+      --widget-accent: #0052cc;
+
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      border: 1px solid var(--widget-border-color);
+      border-radius: var(--widget-border-radius);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 1200px;
+      height: 700px;
+    }
+
+    .jira-widget__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--widget-header-bg);
+      border-bottom: 1px solid var(--widget-border-color);
+      flex-shrink: 0;
+    }
+
+    .jira-widget__title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--widget-header-color);
+    }
+
+    .jira-widget__logo {
+      width: 20px;
+      height: 20px;
+    }
+
+    .jira-widget__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .jira-widget__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #42526e;
+      background: #f4f5f7;
+      border: 1px solid var(--widget-border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .jira-widget__btn:hover {
+      background: #ebecf0;
+    }
+
+    .jira-widget__frame-container {
+      flex: 1;
+      position: relative;
+      background: #f4f5f7;
+    }
+
+    .jira-widget__loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: #6b778c;
+      font-size: 13px;
+      z-index: 1;
+      transition: opacity 0.3s;
+    }
+
+    .jira-widget__loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .jira-widget__spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #dfe1e6;
+      border-top-color: var(--widget-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .jira-widget__iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .jira-widget__status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #6b778c;
+    }
+
+    .jira-widget__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #36b37e;
+    }
+  </style>
+</head>
+<body style="padding: 24px; background: #f9fafb;">
+
+  <div class="jira-widget" id="jiraWidget">
+    <div class="jira-widget__header">
+      <div class="jira-widget__title">
+        <svg class="jira-widget__logo" viewBox="0 0 24 24" fill="none">
+          <path d="M11.53 2c0 5.24 4.24 9.47 9.47 9.47v1.06c-5.23 0-9.47 4.24-9.47 9.47h-1.06c0-5.23-4.24-9.47-9.47-9.47v-1.06c5.23 0 9.47-4.24 9.47-9.47h1.06z" fill="#0052CC"/>
+        </svg>
+        Jira Product Discovery
+      </div>
+      <div class="jira-widget__actions">
+        <span class="jira-widget__status">
+          <span class="jira-widget__dot"></span>
+          Live
+        </span>
+        <button class="jira-widget__btn" onclick="refreshWidget()" title="Refresh">
+          &#x21bb; Refresh
+        </button>
+        <a class="jira-widget__btn"
+           href="https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="Open in new tab">
+          &#x2197; Open
+        </a>
+      </div>
+    </div>
+    <div class="jira-widget__frame-container">
+      <div class="jira-widget__loader" id="loader">
+        <div class="jira-widget__spinner"></div>
+        Loading Jira Discovery Board&hellip;
+      </div>
+      <iframe
+        id="jiraFrame"
+        class="jira-widget__iframe"
+        src="https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1"
+        loading="lazy"
+        allow="clipboard-read; clipboard-write"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+  </div>
+
+  <script>
+    const JIRA_URL = 'https://equityprime.atlassian.net/jira/discovery/share/views/bb08665f-4ef3-47dd-b9a5-12a9613ad0d1';
+
+    const iframe = document.getElementById('jiraFrame');
+    const loader = document.getElementById('loader');
+
+    iframe.addEventListener('load', () => {
+      loader.classList.add('hidden');
+    });
+
+    function refreshWidget() {
+      loader.classList.remove('hidden');
+      iframe.src = JIRA_URL + '?t=' + Date.now();
+    }
+
+    // Auto-refresh every 5 minutes to keep it live
+    setInterval(refreshWidget, 5 * 60 * 1000);
+  </script>
+
+</body>
+</html>
